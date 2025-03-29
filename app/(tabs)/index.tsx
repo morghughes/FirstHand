@@ -43,7 +43,6 @@ export default function HomeScreen() {
               minHeight={40}
             />
             <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-              {/* <Text style={styles.buttonText}>Submit</Text> */}
               <Image source={require('../../assets/images/RedHand.png')} style={styles.buttonImage} />
             </TouchableOpacity>
           </View>
