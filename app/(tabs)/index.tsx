@@ -10,9 +10,17 @@ const RED = '#C1121F'
 const DBLUE = '#003049'
 const LBLUE = '#669BBC'
 
-function handleSubmit() {
+const handleSubmit = () => {
+  console.log('Button pressed!');
+};
 
-}
+const dismissKeyboard = (event: { target: { constructor: { name: string; }; }; }) => {
+  // Check if the tap is outside the TextInput or Button
+  const isTextInputFocused = event.target && event.target.constructor.name === 'TextInput';
+  if (!isTextInputFocused) {
+    Keyboard.dismiss();
+  }
+};
 
 
 export default function HomeScreen() {
@@ -20,7 +28,7 @@ export default function HomeScreen() {
   const [height, setHeight] = useState(40);
 
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+    <TouchableWithoutFeedback onPress={dismissKeyboard}>
       <ThemedView style={styles.titleContainer}>
         <ThemedText type="title" style={styles.centeredText}>FirstHand here, let me help assess the situation</ThemedText>
 
@@ -35,7 +43,8 @@ export default function HomeScreen() {
               minHeight={40}
             />
             <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-              <Text style={styles.buttonText}>Submit</Text>
+              {/* <Text style={styles.buttonText}>Submit</Text> */}
+              <Image source={require('../../assets/images/RedHand.png')} style={styles.buttonImage} />
             </TouchableOpacity>
           </View>
       </ThemedView> 
@@ -81,13 +90,16 @@ const styles = StyleSheet.create({
   },
   button: {
     flex: 0.2,
-    height: 40, 
-    backgroundColor: '#C1121F',
+    height: 40,
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: 25,
   },
   buttonText: {
     color: 'FDF0D5'
+  },
+  buttonImage: {
+    height: 80, 
+    width: 60,
+    resizeMode: 'contain', //Ensures the image scales properly
   },
 });
