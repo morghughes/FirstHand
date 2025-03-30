@@ -6,6 +6,8 @@ import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { Audio } from 'expo-av';
+import WavEncoder from 'wav-encoder';
+import * as FileSystem from 'expo-file-system';
 
 const TAN = "#FDF0D5"
 const RED = '#C1121F'
@@ -54,30 +56,42 @@ export default function HomeScreen() {
     
     try {
       await recording.stopAndUnloadAsync();
-      const uri: string = recording.getURI();
+      const uri = await recording.getURI();
+      
       await sendRecording(uri);
+      console.log(uri);
     } catch (error) {
       console.error('Error stopping recording', error);
     }
   }
 
   const sendRecording = async (uri) => {
-      const formData = new FormData();
-      formData.append('audio_file', {
-        uri: uri,
-        type: 'audio/m4a',
-        name: 'recording.m4a',
+    // Fetch the blob data
+    const correctedUri = Platform.OS === 'ios' ? `file://${uri}` : uri;
+    const response = await fetch(correctedUri);
+    const blob = await response.blob();
+
+    // Create FormData and append the Blob
+    const formData = new FormData();
+    formData.append('audio', blob, 'recording.m4a'); // Pass blob and filename
+
+    // Debug FormData contents
+    for (let [key, value] of formData.entries()) {
+      console.log(`${key}:`, value);
+    }
+
+  
+    try {
+      const response = await fetch('http://10.0.0.96:5000/transcribe', { 
+        method: 'POST',
+        body: formData,
       });
-      
-      try {
-        const response = await fetch('http://127.0.0.1:5000/transcribe', {
-          method: 'POST',
-          body: formData,
-        });
         
         const result = await response.json();
+        console.log(result); 
         // The result should contain the transcribed text
         console.log('Transcription:', result.text);
+        setText(result.text); 
         return result.text;
       } catch (error) {
         console.error('Transcription failed:', error);
