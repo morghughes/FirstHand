@@ -1,16 +1,18 @@
 import { Image, StyleSheet, Platform, TouchableWithoutFeedback, Keyboard, TouchableOpacity, Text, View, KeyboardAvoidingView } from 'react-native';
 import { AutoGrowingTextInput } from 'react-native-autogrow-textinput';
-import React, { useState, useEffect  } from 'react';
+import React, { useState } from 'react';
 // import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
-import { IconSymbol } from '@/components/ui/IconSymbol';
-import { ExpoSpeechRecognitionModule, useSpeechRecognitionEvent } from 'expo-speech-recognition';
 
 const TAN = "#FDF0D5"
 const RED = '#C1121F'
 const DBLUE = '#003049'
 const LBLUE = '#669BBC'
+
+const handleSubmit = () => {
+  console.log('Button pressed!');
+};
 
 const dismissKeyboard = (event: { target: { constructor: { name: string; }; }; }) => {
   // Check if the tap is outside the TextInput or Button
@@ -23,46 +25,7 @@ const dismissKeyboard = (event: { target: { constructor: { name: string; }; }; }
 
 export default function HomeScreen() {
   const [text, setText] = useState('');
-  const [capturingAudio, setCapturingAudio] = useState(true);
-
-  const handleSubmit = () => {
-    console.log(text);
-    // Send text to backend for processing 
-    // Switch screens to chat mode
-  };
-
-  // Register event listeners using hooks
-  useSpeechRecognitionEvent("start", () => setCapturingAudio(true));
-  useSpeechRecognitionEvent("end", () => setCapturingAudio(false));
-  
-  useSpeechRecognitionEvent("result", (event) => {
-    setText(event.results[0]?.transcript || '');
-  });
-  
-  useSpeechRecognitionEvent("error", (event) => {
-    console.log("Error code:", event.error, "Error message:", event.message);
-  });
-
-  const handleStartRecognition = async () => {
-    // Request permissions first
-    const result = await ExpoSpeechRecognitionModule.requestPermissionsAsync();
-    
-    if (!result.granted) {
-      console.warn("Permissions not granted", result);
-      return;
-    }
-    
-    // Start speech recognition
-    ExpoSpeechRecognitionModule.start({
-      lang: "en-US",
-      interimResults: true,
-      continuous: false,
-    });
-  };
-
-  const handleStopRecognition = () => {
-    ExpoSpeechRecognitionModule.stop();
-  };
+  const [height, setHeight] = useState(40);
 
   return (
     <KeyboardAvoidingView
@@ -74,7 +37,7 @@ export default function HomeScreen() {
         <ThemedText type="title" style={styles.centeredText}>FirstHand here, let me help assess the situation</ThemedText>
 
         <View style={styles.speakingContainer}>
-            <TouchableOpacity style={styles.talkButton} onPress={capturingAudio ? handleStartRecognition : handleStopRecognition}>
+            <TouchableOpacity style={styles.talkButton} onPress={handleSubmit}>
               <Image source={require('../../assets/images/RedHand.png')} style={styles.talkButtonImage} />
             </TouchableOpacity>
             <ThemedText type="title" style={styles.centeredText}>Tell me the situation</ThemedText>
@@ -91,11 +54,7 @@ export default function HomeScreen() {
               minHeight={40}
             />
             <TouchableOpacity style={styles.textButton} onPress={handleSubmit}>
-            <IconSymbol 
-              name="paperplane.fill" 
-              size={28} 
-              color={RED} // Use your desired color
-            />
+              <Image source={require('../../assets/images/RedHand.png')} style={styles.buttonImage} />
             </TouchableOpacity>
           </View>
       </ThemedView> 
