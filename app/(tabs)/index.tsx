@@ -4,6 +4,8 @@ import React, { useState } from 'react';
 // import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
+import { IconSymbol } from '@/components/ui/IconSymbol';
+import { Audio } from 'expo-av';
 
 const TAN = "#FDF0D5"
 const RED = '#C1121F'
@@ -25,7 +27,8 @@ const dismissKeyboard = (event: { target: { constructor: { name: string; }; }; }
 
 export default function HomeScreen() {
   const [text, setText] = useState('');
-  const [height, setHeight] = useState(40);
+  const [recording, setRecording] = useState(null);
+  const [isRecording, setIsRecording] = useState(false);
 
   return (
     <KeyboardAvoidingView
@@ -54,7 +57,7 @@ export default function HomeScreen() {
               minHeight={40}
             />
             <TouchableOpacity style={styles.textButton} onPress={handleSubmit}>
-              <Image source={require('../../assets/images/RedHand.png')} style={styles.buttonImage} />
+              <IconSymbol name="paperplane.fill" color={RED} />
             </TouchableOpacity>
           </View>
       </ThemedView> 
@@ -69,6 +72,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 20,
+    marginBottom: 15,
   },
   stepContainer: {
     gap: 8,
@@ -119,10 +123,11 @@ const styles = StyleSheet.create({
   },
   talkButton: {
     flex: 0.4,
-    height: 80,
+    height: 200,
     justifyContent: 'center',
     alignItems: 'center',
     paddingBottom: 20,
+    paddingTop: 20, 
   },
   buttonImage: {
     height: 80, 
