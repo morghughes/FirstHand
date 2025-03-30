@@ -1,4 +1,4 @@
-import { Image, StyleSheet, Platform, TouchableWithoutFeedback, Keyboard, TouchableOpacity, Text, View, KeyboardAvoidingView } from 'react-native';
+import { Image, StyleSheet, Platform, TouchableWithoutFeedback, Keyboard, TouchableOpacity, Text, View, KeyboardAvoidingView, FlatList } from 'react-native';
 import { AutoGrowingTextInput } from 'react-native-autogrow-textinput';
 import React, { useState } from 'react';
 // import ParallaxScrollView from '@/components/ParallaxScrollView';
@@ -54,8 +54,9 @@ export default function HomeScreen() {
       await recording.stopAndUnloadAsync();
       const uri = await recording.getURI();
       
-      await sendRecording(uri);
-      console.log(uri);
+      const transcript: string = await sendRecording(uri);
+      console.log(transcript);
+      router.push({ pathname: '/screens/chat', params: { prompt: transcript } })
     } catch (error) {
       console.error('Error stopping recording', error);
     }
@@ -87,7 +88,6 @@ export default function HomeScreen() {
         console.log(result); 
         // The result should contain the transcribed text
         console.log('Transcription:', result.text);
-        setText(result.text); 
         return result.text;
       } catch (error) {
         console.error('Transcription failed:', error);
