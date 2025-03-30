@@ -6,6 +6,8 @@ import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { Audio } from 'expo-av';
+import WavEncoder from 'wav-encoder';
+import * as FileSystem from 'expo-file-system';
 
 const TAN = "#FDF0D5"
 const RED = '#C1121F'
@@ -54,28 +56,52 @@ export default function HomeScreen() {
     
     try {
       await recording.stopAndUnloadAsync();
-      const uri: string = recording.getURI();
-      await sendRecording(uri);
+      const uri = await recording.getURI();
+      
+       // Convert recorded audio to WAV format
+      const wavData = await convertToWav(uri);
+      console.log('wavData: ', wavData);
+      await sendRecording(wavData);
     } catch (error) {
       console.error('Error stopping recording', error);
     }
   }
 
-  const sendRecording = async (uri) => {
-      const formData = new FormData();
-      formData.append('audio_file', {
-        uri: uri,
-        type: 'audio/m4a',
-        name: 'recording.m4a',
+  const convertToWav = async (uri) => {
+    try {
+       // Fetch raw audio data from the URI
+      const response = await fetch(uri);
+      const arrayBuffer = await response.arrayBuffer();
+
+      // Decode raw audio data into PCM format using Web Audio API
+      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      const decodedData = await audioContext.decodeAudioData(arrayBuffer);
+
+      // Encode PCM data into WAV format using wav-encoder
+      const wavData = WavEncoder.encode({
+        sampleRate: decodedData.sampleRate,
+        channelData: [decodedData.getChannelData(0)], // Mono channel data
       });
-      
-      try {
-        const response = await fetch('http://127.0.0.1:5000/transcribe', {
-          method: 'POST',
-          body: formData,
-        });
+  
+      console.log('Converted to WAV');
+      return wavData; // Return WAV data in memory
+    } catch (error) {
+      console.error('Error converting to WAV:', error);
+    }
+  };
+
+  const sendRecording = async (wavData) => {
+    const formData = new FormData();
+    formData.append('audio', new Blob([wavData], { type: 'audio/wav' }), 'recording.wav');
+  
+    try {
+      const response = await fetch('http://10.0.0.96:5000/transcribe', { 
+        method: 'POST',
+        body: formData,
+      });
         
         const result = await response.json();
+        console.log(result); 
         // The result should contain the transcribed text
         console.log('Transcription:', result.text);
         return result.text;
