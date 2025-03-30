@@ -2,6 +2,7 @@
 
 # local python environment
 venv/
+__pycache__/
 
 # dependencies
 node_modules/
