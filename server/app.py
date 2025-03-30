@@ -58,5 +58,21 @@ def transcribe_audio():
             os.remove(converted_filename)
 
 
+@app.route('/process', methods=['POST'])
+def process_text():
+    data = request.get_json()
+    # text = data.get("text", "")
+
+    API_URL =  "https://api-inference.huggingface.co/models/morghughes/firsthand_model"
+    # API_TOKEN = ""
+
+    headers = {"Authorization": f"Bearer {API_TOKEN}"}
+
+    # Query the model
+    response = request.post(API_URL, headers=headers, json=data)
+    result = response.json()
+    return result 
+
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
