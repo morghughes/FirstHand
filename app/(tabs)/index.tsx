@@ -6,15 +6,12 @@ import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { Audio } from 'expo-av';
+import { useRouter } from 'expo-router';
 
 const TAN = "#FDF0D5"
 const RED = '#C1121F'
 const DBLUE = '#003049'
 const LBLUE = '#669BBC'
-
-const handleSubmit = () => {
-  console.log('Button pressed!');
-};
 
 const dismissKeyboard = (event: { target: { constructor: { name: string; }; }; }) => {
   // Check if the tap is outside the TextInput or Button
@@ -29,6 +26,7 @@ export default function HomeScreen() {
   const [text, setText] = useState('');
   const [recording, setRecording] = useState<Audio.Recording | null>(null);
   const [isRecording, setIsRecording] = useState(false);
+  const router = useRouter();
 
   async function startRecording() {
     try {
@@ -123,7 +121,7 @@ export default function HomeScreen() {
               maxHeight={180}
               minHeight={40}
             />
-            <TouchableOpacity style={styles.textButton} onPress={handleSubmit}>
+            <TouchableOpacity style={styles.textButton} onPress={() => router.push({ pathname: '/screens/chat', params: { prompt: text } })}>
               <IconSymbol name="paperplane.fill" color={RED} />
             </TouchableOpacity>
           </View>
