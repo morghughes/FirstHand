@@ -1,4 +1,4 @@
-import { Image, StyleSheet, Platform, TouchableWithoutFeedback, Keyboard, TouchableOpacity, Text, View, KeyboardAvoidingView } from 'react-native';
+import { Image, StyleSheet, Platform, TouchableWithoutFeedback, Keyboard, TouchableOpacity, Text, View, KeyboardAvoidingView, FlatList } from 'react-native';
 import { AutoGrowingTextInput } from 'react-native-autogrow-textinput';
 import React, { useState } from 'react';
 // import ParallaxScrollView from '@/components/ParallaxScrollView';
@@ -6,15 +6,12 @@ import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { Audio } from 'expo-av';
+import { useRouter } from 'expo-router';
 
 const TAN = "#FDF0D5"
 const RED = '#C1121F'
 const DBLUE = '#003049'
 const LBLUE = '#669BBC'
-
-const handleSubmit = () => {
-  console.log('Button pressed!');
-};
 
 const dismissKeyboard = (event: { target: { constructor: { name: string; }; }; }) => {
   // Check if the tap is outside the TextInput or Button
@@ -29,6 +26,7 @@ export default function HomeScreen() {
   const [text, setText] = useState('');
   const [recording, setRecording] = useState<Audio.Recording | null>(null);
   const [isRecording, setIsRecording] = useState(false);
+  const router = useRouter();
 
   async function startRecording() {
     try {
@@ -56,8 +54,9 @@ export default function HomeScreen() {
       await recording.stopAndUnloadAsync();
       const uri = await recording.getURI();
       
-      await sendRecording(uri);
-      console.log(uri);
+      const transcript: string = await sendRecording(uri);
+      console.log(transcript);
+      router.push({ pathname: '/screens/chat', params: { prompt: transcript } })
     } catch (error) {
       console.error('Error stopping recording', error);
     }
@@ -89,7 +88,6 @@ export default function HomeScreen() {
         console.log(result); 
         // The result should contain the transcribed text
         console.log('Transcription:', result.text);
-        setText(result.text); 
         return result.text;
       } catch (error) {
         console.error('Transcription failed:', error);
@@ -123,7 +121,7 @@ export default function HomeScreen() {
               maxHeight={180}
               minHeight={40}
             />
-            <TouchableOpacity style={styles.textButton} onPress={handleSubmit}>
+            <TouchableOpacity style={styles.textButton} onPress={() => router.push({ pathname: '/screens/chat', params: { prompt: text } })}>
               <IconSymbol name="paperplane.fill" color={RED} />
             </TouchableOpacity>
           </View>
