@@ -59,11 +59,17 @@ export default function ChatScreen() {
 
   const processMessage = async (message: string) => {
     try {
-      //Simulate response w delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      console.log(message)
+        const response = await fetch('http://10.0.0.96:5000/process', { 
+          method: 'POST',
+          body: JSON.stringify({ text }),
+        });
+          
+        const result = await response.json();
+        console.log(result); 
+          
+      
       // Create a dynamic response based on the message
-      let responseText = "Sorry not linked";
+      let responseText = result.message || "Sorry, no response available.";
 
       // Add AI response
       const aiResponse = {
