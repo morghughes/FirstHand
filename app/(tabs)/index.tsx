@@ -6,8 +6,6 @@ import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { Audio } from 'expo-av';
-import WavEncoder from 'wav-encoder';
-import * as FileSystem from 'expo-file-system';
 
 const TAN = "#FDF0D5"
 const RED = '#C1121F'
