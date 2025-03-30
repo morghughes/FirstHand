@@ -18,20 +18,25 @@ def transcribe_audio():
         return jsonify({'error': 'No audio file provided'}), 400
 
     audio_file = request.files['audio']
+    print("Received audio file:", audio_file)
 
     # Save the uploaded file temporarily
-    with tempfile.NamedTemporaryFile(delete=False, suffix='.wav') as temp_audio:
+    with tempfile.NamedTemporaryFile(delete=False, suffix='.m4a') as temp_audio:
         audio_file.save(temp_audio.name)
         temp_filename = temp_audio.name
         print(temp_filename)
 
     try:
+        # Convert M4A to WAV using FFmpeg
+        converted_filename = temp_filename.replace('.m4a', '.wav')
+        subprocess.run(['ffmpeg', '-i', temp_filename, '-ar', '16000', '-ac', '1', converted_filename], check=True)
+
         print("MAKING RECOGNIZER")
         recognizer = sr.Recognizer()
         print("MADE RECOGNIZER")
     
         # Load the audio file
-        with sr.AudioFile(temp_filename) as source:
+        with sr.AudioFile(converted_filename) as source:
             print("OPENED FILE")
             audio_data = recognizer.record(source)
         print("LOADED AUDIO FILE")
@@ -49,6 +54,8 @@ def transcribe_audio():
         # Clean up the temporary file
         if os.path.exists(temp_filename):
             os.remove(temp_filename)
+        if os.path.exists(converted_filename):
+            os.remove(converted_filename)
 
 
 if __name__ == '__main__':

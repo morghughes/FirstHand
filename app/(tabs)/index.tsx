@@ -58,41 +58,28 @@ export default function HomeScreen() {
       await recording.stopAndUnloadAsync();
       const uri = await recording.getURI();
       
-       // Convert recorded audio to WAV format
-      const wavData = await convertToWav(uri);
-      console.log('wavData: ', wavData);
-      await sendRecording(wavData);
+      await sendRecording(uri);
+      console.log(uri);
     } catch (error) {
       console.error('Error stopping recording', error);
     }
   }
 
-  const convertToWav = async (uri) => {
-    try {
-       // Fetch raw audio data from the URI
-      const response = await fetch(uri);
-      const arrayBuffer = await response.arrayBuffer();
+  const sendRecording = async (uri) => {
+    // Fetch the blob data
+    const correctedUri = Platform.OS === 'ios' ? `file://${uri}` : uri;
+    const response = await fetch(correctedUri);
+    const blob = await response.blob();
 
-      // Decode raw audio data into PCM format using Web Audio API
-      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-      const decodedData = await audioContext.decodeAudioData(arrayBuffer);
-
-      // Encode PCM data into WAV format using wav-encoder
-      const wavData = WavEncoder.encode({
-        sampleRate: decodedData.sampleRate,
-        channelData: [decodedData.getChannelData(0)], // Mono channel data
-      });
-  
-      console.log('Converted to WAV');
-      return wavData; // Return WAV data in memory
-    } catch (error) {
-      console.error('Error converting to WAV:', error);
-    }
-  };
-
-  const sendRecording = async (wavData) => {
+    // Create FormData and append the Blob
     const formData = new FormData();
-    formData.append('audio', new Blob([wavData], { type: 'audio/wav' }), 'recording.wav');
+    formData.append('audio', blob, 'recording.m4a'); // Pass blob and filename
+
+    // Debug FormData contents
+    for (let [key, value] of formData.entries()) {
+      console.log(`${key}:`, value);
+    }
+
   
     try {
       const response = await fetch('http://10.0.0.96:5000/transcribe', { 
@@ -104,6 +91,7 @@ export default function HomeScreen() {
         console.log(result); 
         // The result should contain the transcribed text
         console.log('Transcription:', result.text);
+        setText(result.text); 
         return result.text;
       } catch (error) {
         console.error('Transcription failed:', error);
