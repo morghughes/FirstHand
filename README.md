@@ -6,3 +6,6 @@
 <div align="center">
    <img src="https://github.com/user-attachments/assets/914dd06e-3ac9-4a9b-8050-5f06cea441ba" alt="ScreenShot" width="500" height="900"/>
 </div>
+
+* Find the model we trained at: <href>https://huggingface.co/morghughes/firsthand_model</href>
+* Colab notebook containing training pipeline included in FirstHand.ipynb
