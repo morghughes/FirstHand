@@ -27,8 +27,63 @@ const dismissKeyboard = (event: { target: { constructor: { name: string; }; }; }
 
 export default function HomeScreen() {
   const [text, setText] = useState('');
-  const [recording, setRecording] = useState(null);
+  const [recording, setRecording] = useState<Audio.Recording | null>(null);
   const [isRecording, setIsRecording] = useState(false);
+
+  async function startRecording() {
+    try {
+      await Audio.requestPermissionsAsync();
+      await Audio.setAudioModeAsync({
+        allowsRecordingIOS: true,
+        playsInSilentModeIOS: true,
+      });
+      
+      const { recording } = await Audio.Recording.createAsync(
+        Audio.RecordingOptionsPresets.HIGH_QUALITY
+      );
+      
+      setRecording(recording);
+      setIsRecording(true);
+    } catch (err) {
+      console.error('Failed to start recording', err);
+    }
+  }
+
+  async function stopRecording() {
+    setIsRecording(false);
+    
+    try {
+      await recording.stopAndUnloadAsync();
+      const uri: string = recording.getURI();
+      await sendRecording(uri);
+    } catch (error) {
+      console.error('Error stopping recording', error);
+    }
+  }
+
+  const sendRecording = async (uri) => {
+      const formData = new FormData();
+      formData.append('audio_file', {
+        uri: uri,
+        type: 'audio/m4a',
+        name: 'recording.m4a',
+      });
+      
+      try {
+        const response = await fetch('YOUR_PYTHON_BACKEND_URL/transcribe', {
+          method: 'POST',
+          body: formData,
+        });
+        
+        const result = await response.json();
+        // The result should contain the transcribed text
+        console.log('Transcription:', result.text);
+        return result.text;
+      } catch (error) {
+        console.error('Transcription failed:', error);
+        return null;
+      }
+    };
 
   return (
     <KeyboardAvoidingView
@@ -40,7 +95,7 @@ export default function HomeScreen() {
         <ThemedText type="title" style={styles.centeredText}>FirstHand here, let me help assess the situation</ThemedText>
 
         <View style={styles.speakingContainer}>
-            <TouchableOpacity style={styles.talkButton} onPress={handleSubmit}>
+            <TouchableOpacity style={styles.talkButton} onPress={isRecording ? stopRecording : startRecording}>
               <Image source={require('../../assets/images/RedHand.png')} style={styles.talkButtonImage} />
             </TouchableOpacity>
             <ThemedText type="title" style={styles.centeredText}>Tell me the situation</ThemedText>
